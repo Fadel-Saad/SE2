@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises';
+import util from 'node:util';
 import { parseStringPromise } from "xml2js";
 
 export async function readXmlFile(path: string):Promise<any> {
@@ -16,3 +17,13 @@ export async function readXmlFile(path: string):Promise<any> {
             throw new Error("Malformed XML");
         }
 }
+
+// Running XML Parser:
+
+// async function xml() {
+//     const res = await readXmlFile("src/data/toy orders.xml");
+//     // console.log(JSON.stringify(data, null, 2));
+//     console.log(util.inspect(res, false, null));
+// }
+
+// xml();

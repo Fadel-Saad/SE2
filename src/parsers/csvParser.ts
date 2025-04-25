@@ -36,3 +36,12 @@ export async function readCSVFile(filePath: string, includeHeader: boolean = fal
             });
 }
 
+// Running CSV Parser:
+
+// async function csv() {
+//     const data = await readCSVFile("src/data/cake orders.csv", true);
+//     // for each data row, log the the row
+//     data.forEach((row) => logger.info(row));
+// }
+
+// csv();

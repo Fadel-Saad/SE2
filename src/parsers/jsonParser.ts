@@ -15,3 +15,14 @@ export async function readJsonFile(path: string): Promise<{}[]> {
             throw new Error("Malformed JSON");
         }
 }
+
+// Running JSON Parser:
+
+// async function json() {
+//     const data = await readJsonFile("src/data/book orders.json");
+//     console.log(data);
+//     // logger.info(data);
+    
+// }
+
+// json();
