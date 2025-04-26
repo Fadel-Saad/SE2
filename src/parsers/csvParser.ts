@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import * as fs from 'fs/promises';
 import { parse as csvParse } from "csv-parse";
 import { stringify as csvStringify } from "csv-stringify";
 
@@ -14,42 +14,25 @@ import { stringify as csvStringify } from "csv-stringify";
  */
 
 export async function readCSVFile(filePath: string, includeHeader: boolean = false): Promise<string[][]> {
-    try {
+    
         const fileContent = await fs.readFile(filePath, "utf-8");
-        return new Promise((resolve, reject) => {
-            csvParse(fileContent, {
-                trim: true,
-                skip_empty_lines: true
-            }, (err, records: string[][]) => {
-                if(err) reject(err);
-                if(!includeHeader) records.shift();
-                resolve(records);
-            });
-        });
-    } catch (error) {
-        throw new Error(`Error reading CSV file: ${error}`);
-    }
-}
 
-/**
- * Writes a 2D array of strings to a CSV file
- * @param filePath - Path where the csv file should be written
- * @param data - 2D array of strings to write
- * @returns Promise<void>
- */
+        if(!fileContent.trim()) {
+            throw new Error("Empty CSV file");
+        }
+            return new Promise((resolve, reject) => {
+                csvParse(fileContent, {
+                    trim: true,
+                    skip_empty_lines: true
+                }, (err, records: string[][]) => {
+                    if(err) {
+                        reject( new Error("Malformed CSV"));
+                        return
+                    }
 
-export async function writeCSVFile(filePath: string, data: string[][]): Promise<void> {
-    try {
-        const csvContent = await new Promise<string>((resolve, reject) => {
-            csvStringify(data, (err, output) => {
-                if(err) reject(err);
-                resolve(output);
+                    if(!includeHeader) records.shift();
+                    resolve(records);
+                });
             });
-        });
-        await fs.writeFile(filePath, csvContent,"utf-8");
-        
-    } catch (error) {
-        throw new Error(`Error writing CSV file: ${error}`);
-    }
 }
 
