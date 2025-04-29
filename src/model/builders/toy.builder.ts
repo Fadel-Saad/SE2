@@ -12,6 +12,10 @@ export class ToyBuilder {
     private price!: number;
     private quantity!: number;
 
+    public static newBuilder(): ToyBuilder {
+        return new ToyBuilder();
+    }
+
     setOrderId(orderId: number) :ToyBuilder {
         this.orderId = orderId;
         return this;
