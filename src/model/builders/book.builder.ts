@@ -14,6 +14,10 @@ export class BookBuilder {
     private price!: number;
     private quantity!: number;
 
+    public static newBuilder(): BookBuilder {
+        return new BookBuilder();
+    }
+
     setOrderId(orderId: number) :BookBuilder {
         this.orderId = orderId;
         return this;
