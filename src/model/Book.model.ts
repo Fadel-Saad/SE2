@@ -1,4 +1,6 @@
-import { IItem, ItemCategory } from "./IItem";
+import { IIdentifiableItem, IItem, ItemCategory } from "./IItem";
+import { id } from "repository/IRepository";
+
 
 export class Book implements IItem {
     private orderId: number;
@@ -10,8 +12,6 @@ export class Book implements IItem {
     private publisher: string;
     private specialEdition: string;
     private packaging: string;
-    private price: number;
-    private quantity: number;
 
     constructor (
         orderId: number,
@@ -23,8 +23,6 @@ export class Book implements IItem {
         publisher: string,
         specialEdition: string,
         packaging: string,
-        price: number,
-        quantity: number,
     ) {
         this.orderId = orderId,
         this.title = title,
@@ -34,9 +32,7 @@ export class Book implements IItem {
         this.language = language,
         this.publisher = publisher,
         this.specialEdition = specialEdition,
-        this.packaging = packaging,
-        this.price = price,
-        this.quantity = quantity
+        this.packaging = packaging
     }
 
     getCategory(): ItemCategory {
@@ -78,12 +74,37 @@ export class Book implements IItem {
     getPackaging(): string {
         return this.packaging;
     }
+}
 
-    getPrice(): number {
-        return this.price;
+export class IdentifiableBook extends Book implements IIdentifiableItem {
+
+    constructor(
+        private id: id,
+        orderId: number,
+        title: string,
+        author: string,
+        genre: string,
+        format: string,
+        language: string,
+        publisher: string,
+        specialEdition: string,
+        packaging: string,
+    ) {
+        super(
+            orderId,
+            title,
+            author,
+            genre,
+            format,
+            language,
+            publisher,
+            specialEdition,
+            packaging
+        );
     }
 
-    getQuantity(): number {
-        return this.quantity;
+    getId(): id {
+        return this.id;
     }
+    
 }

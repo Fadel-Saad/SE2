@@ -1,4 +1,6 @@
-import { IItem, ItemCategory } from "./IItem";
+import { IIdentifiableItem, IItem, ItemCategory } from "./IItem";
+import { id } from "repository/IRepository";
+
 
 export class Toy implements IItem {
     private orderId: number;
@@ -8,8 +10,6 @@ export class Toy implements IItem {
     private material:string;
     private batteryRequired:boolean;
     private educational:boolean;
-    private price: number;
-    private quantity: number;
 
     constructor (
         orderId: number,
@@ -19,8 +19,6 @@ export class Toy implements IItem {
         material:string,
         batteryRequired:boolean,
         educational:boolean,
-        price: number,
-        quantity: number,
     ) {
         this.orderId = orderId,
         this.type = type,
@@ -28,10 +26,7 @@ export class Toy implements IItem {
         this.brand = brand,
         this.material = material,
         this.batteryRequired = batteryRequired,
-        this.educational = educational,
-
-        this.price = price,
-        this.quantity = quantity
+        this.educational = educational
     }
 
     getCategory(): ItemCategory {
@@ -65,12 +60,33 @@ export class Toy implements IItem {
     getEducational(): boolean {
         return this.educational;
     }
+}
 
-    getPrice(): number {
-        return this.price;
+export class IdentifiableToy extends Toy implements IIdentifiableItem {
+
+    constructor(
+        private id: id,
+        orderId: number,
+        type: string,
+        ageGroup: string,
+        brand:string,
+        material:string,
+        batteryRequired:boolean,
+        educational:boolean,
+    ) {
+        super(
+            orderId,
+            type,
+            ageGroup,
+            brand,
+            material,
+            batteryRequired,
+            educational,
+        )
     }
 
-    getQuantity(): number {
-        return this.quantity;
+    getId(): id {
+        return this.id;
     }
+    
 }

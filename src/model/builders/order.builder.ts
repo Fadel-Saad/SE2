@@ -1,5 +1,5 @@
-import { Order } from "../order.model";
-import { IItem } from "../IItem";
+import { IdentifiableOrderItem, Order } from "../order.model";
+import { IIdentifiableItem, IItem } from "../IItem";
 import logger from "../../util/logger";
 
 export class OrderBuilder {
@@ -53,5 +53,32 @@ export class OrderBuilder {
             this.quantity,
             this.id,
         );
+    }
+}
+
+export class IdentifiableOrderItemBuilder {
+    private item!: IIdentifiableItem;
+    private order!: Order;
+
+    static newBuilder(): IdentifiableOrderItemBuilder {
+        return new IdentifiableOrderItemBuilder()
+    }
+
+    setItem(item: IIdentifiableItem): IdentifiableOrderItemBuilder {
+        this.item = item;
+        return this;
+    }
+
+    setOrder(order: Order): IdentifiableOrderItemBuilder {
+        this.order = order;
+        return this;
+    }
+
+    build(): IdentifiableOrderItem {
+        if (!this.item || !this.order) {
+            throw new Error("Missing required properties to build an Identifiable Order");
+        }
+        return new IdentifiableOrderItem(this.item, this.order.getPrice(), this.order.getQuantity(), this.order.getId());
+
     }
 }

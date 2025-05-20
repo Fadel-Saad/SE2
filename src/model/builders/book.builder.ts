@@ -1,4 +1,4 @@
-import { Book } from "../Book.model";
+import { Book, IdentifiableBook } from "../Book.model";
 import logger from "../../util/logger";
 
 export class BookBuilder {
@@ -11,8 +11,6 @@ export class BookBuilder {
     private publisher!: string;
     private specialEdition!: string;
     private packaging!: string;
-    private price!: number;
-    private quantity!: number;
 
     public static newBuilder(): BookBuilder {
         return new BookBuilder();
@@ -69,16 +67,6 @@ export class BookBuilder {
         return this;
     }
 
-    setPrice(price: number) :BookBuilder {
-        this.price = price;
-        return this;
-    }
-
-    setQuantity(quantity: number) :BookBuilder {
-        this.quantity = quantity;
-        return this;
-    }
-
 
     build(): Book {
         const requiredProperties = [
@@ -91,10 +79,8 @@ export class BookBuilder {
             this.publisher,
             this.specialEdition,
             this.packaging,
-            this.price,
-            this.quantity,
         ];
-        
+
         for (const property of requiredProperties) {
             if (property === undefined) {
                 logger.error("Missing required properties, could not build a book");
@@ -112,8 +98,45 @@ export class BookBuilder {
             this.publisher,
             this.specialEdition,
             this.packaging,
-            this.price,
-            this.quantity,
+        );
+    }
+}
+
+export class IdentifiableBookBuilder {
+    private id!: string;
+    private book!: Book;
+
+    static newBuilder(): IdentifiableBookBuilder {
+        return new IdentifiableBookBuilder();
+    }
+    
+    setId(id: string): IdentifiableBookBuilder {
+        this.id = id;
+        return this;
+    }
+
+    setBook(book: Book): IdentifiableBookBuilder {
+        this.book = book;
+        return this;
+    }
+
+    build(): IdentifiableBook {
+        if (!this.id || !this.book) {
+            logger.error("Missing required properties, could not build an identifiable book");
+            throw new Error("Missing required properties to build an identifiable book");
+        }
+
+        return new IdentifiableBook(
+            this.id,
+            this.book.getOrderId(),
+            this.book.getTitle(),
+            this.book.getAuthor(),
+            this.book.getGenre(),
+            this.book.getFormat(),
+            this.book.getLanguage(),
+            this.book.getPublisher(),
+            this.book.getSpecialEdition(),
+            this.book.getPackaging()
         );
     }
 }

@@ -62,8 +62,6 @@ describe("Book builder tests", () => {
             .setPublisher("publisher")
             .setSpecialEdition("special")
             .setPackaging("packaging")
-            .setPrice(20)
-            .setQuantity(4)
             .build();
 
         expect(validBook).toBeDefined();
@@ -83,8 +81,6 @@ describe("Book builder tests", () => {
             .setPublisher("publisher")
             .setSpecialEdition("special")
             .setPackaging("packaging")
-            .setPrice(20)
-            .setQuantity(4)
             .build();
         }
         
@@ -105,8 +101,6 @@ describe("Toy builder tests", () => {
             .setMaterial("material")
             .setBatteryRequired(true)
             .setEducational(false)
-            .setPrice(25)
-            .setQuantity(12)
             .build();
 
         expect(validToy).toBeDefined();
