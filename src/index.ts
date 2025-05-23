@@ -1,42 +1,36 @@
-import { CSVOrderMapper, JSONOrderMapper, XMLOrderMapper } from "./mappers/Order.mapper";
-import { CSVCakeMapper } from "./mappers/Cake.mapper";
-import { JSONBookMapper } from "./mappers/Book.mapper";
-import { XMLToyMapper } from "./mappers/Toy.mapper";
-import { readCSVFile } from "./parsers/csvParser";
-import { readJsonFile } from "./parsers/jsonParser";
-import { readXmlFile } from "./parsers/xmlParser";
 import logger from "./util/logger";
+import { CakeBuilder, IdentifiableCakeBuilder } from "./model/builders/cake.builder";
+import { IdentifiableOrderItemBuilder, OrderBuilder } from "./model/builders/order.builder";
+import { OrderRepository } from "./repository/postgreSQL/Order.repository";
+import { ToyRepository } from "./repository/postgreSQL/Toy.order.repository";
 
-async function runCakeMapper() {
-    const data = await readCSVFile("src/data/cake orders.csv");
-    const cakeMapper = new CSVCakeMapper();
-    const orderMapper = new CSVOrderMapper(cakeMapper);
-    const orders = data.map(row => orderMapper.map(row));
+
+async function DBSandBox() {
+
+    const dbOrder = new OrderRepository(new ToyRepository());
+    await dbOrder.init();
+
+    // create identifiable cake
+    const cake = CakeBuilder.newBuilder().setType("cake")
+    .setFlavor("chocolate").setFilling("cream")
+    .setSize(10).setLayers(2).setFrostingType("buttercream")
+    .setFrostingFlavor("vanilla").setDecorationType("sprinkles")
+    .setDecorationColor("red").setCustomMessage("happy birthday")
+    .setShape("round").setAllergies("nuts")
+    .setSpecialIngredients("none").setPackagingType("box").build();
+
+    const idCake = IdentifiableCakeBuilder.newBuilder().setCake(cake).setId(Math.random().toString(36).substring(2, 15)).build();
+
+    // create identifiable order
+    const cakeOrder = OrderBuilder.newBuilder().setPrice(100).setItem(cake).setQuantity(1).setId(Math.random().toString(36).substring(2, 15)).build();
+    const idCakeOrder = IdentifiableOrderItemBuilder.newBuilder().setItem(idCake).setOrder(cakeOrder).build();
+
     
-    logger.info("List of orders: \n %o", orders);
+    await dbOrder.create(idCakeOrder);
+    await dbOrder.delete(idCakeOrder.getId());
+    // await dbOrder.update(idCakeOrder);
+    console.log((await dbOrder.getAll()).length);
+    
 }
 
-runCakeMapper();
-
-
-async function runBookMapper() {
-    const data = await readJsonFile("src/data/book orders.json");
-    const bookMapper = new JSONBookMapper();
-    const orderMapper = new JSONOrderMapper(bookMapper);
-    const orders = data.map((row: {} | []) => orderMapper.map(row));
-    
-    logger.info("List of orders: \n %o", orders);
-}
-
-runBookMapper();
-
-async function runToyMapper() {
-    const res = await readXmlFile("src/data/toy orders.xml");
-    const toyMapper = new XMLToyMapper();
-    const orderMapper = new XMLOrderMapper(toyMapper);
-    const orders = res.data.row.map((row: {} | []) => orderMapper.map(row));
-    
-    logger.info("List of orders: \n %o", orders);
-}
-
-runToyMapper();
+DBSandBox().catch((error) => logger.error("Error in DB sandbox: %o", error as Error));

@@ -1,4 +1,4 @@
-import { Toy } from "../Toy.model";
+import { IdentifiableToy, Toy } from "../Toy.model";
 import logger from "../../util/logger";
 
 export class ToyBuilder {
@@ -9,8 +9,6 @@ export class ToyBuilder {
     private material!:string;
     private batteryRequired!:boolean;
     private educational!:boolean;
-    private price!: number;
-    private quantity!: number;
 
     public static newBuilder(): ToyBuilder {
         return new ToyBuilder();
@@ -51,16 +49,6 @@ export class ToyBuilder {
         return this;
     }
 
-    setPrice(price: number) :ToyBuilder {
-        this.price = price;
-        return this;
-    }
-
-    setQuantity(quantity: number) :ToyBuilder {
-        this.quantity = quantity;
-        return this;
-    }
-
 
     build(): Toy {
         const requiredProperties = [
@@ -71,8 +59,6 @@ export class ToyBuilder {
             this.material,
             this.batteryRequired,
             this.educational,
-            this.price,
-            this.quantity,
         ];
         
         for (const property of requiredProperties) {
@@ -90,8 +76,43 @@ export class ToyBuilder {
             this.material,
             this.batteryRequired,
             this.educational,
-            this.price,
-            this.quantity,
+        );
+    }
+}
+
+export class IdentifiableToyBuilder {
+    private id!: string;
+    private toy!: Toy;
+
+    static newBuilder(): IdentifiableToyBuilder {
+        return new IdentifiableToyBuilder();
+    }
+        
+    setId(id: string): IdentifiableToyBuilder {
+        this.id = id;
+        return this;
+    }
+
+    setToy(toy: Toy): IdentifiableToyBuilder {
+        this.toy = toy;
+        return this;
+    }
+
+    build(): IdentifiableToy {
+        if (!this.id || !this.toy) {
+            logger.error("Missing required properties, could not build an identifiable toy");
+            throw new Error("Missing required properties to build an identifiable toy");
+        }
+
+        return new IdentifiableToy(
+            this.id,
+            this.toy.getOrderId(),
+            this.toy.getType(),
+            this.toy.getAgeGroup(),
+            this.toy.getBrand(),
+            this.toy.getMaterial(),
+            this.toy.getBatteryRequired(),
+            this.toy.getEducational(),
         );
     }
 }
