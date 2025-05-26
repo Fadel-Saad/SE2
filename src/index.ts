@@ -3,12 +3,13 @@ import { CakeBuilder, IdentifiableCakeBuilder } from "./model/builders/cake.buil
 import { IdentifiableOrderItemBuilder, OrderBuilder } from "./model/builders/order.builder";
 import { OrderRepository } from "./repository/postgreSQL/Order.repository";
 import { ToyRepository } from "./repository/postgreSQL/Toy.order.repository";
+import { DBMode, RepositoryFactory } from "./repository/Repository.factory";
+import { ItemCategory } from "./model/IItem";
 
 
 async function DBSandBox() {
 
-    const dbOrder = new OrderRepository(new ToyRepository());
-    await dbOrder.init();
+    const dbOrder = await RepositoryFactory.create(DBMode.POSTGRESQL, ItemCategory.CAKE);
 
     // create identifiable cake
     const cake = CakeBuilder.newBuilder().setType("cake")
@@ -27,7 +28,7 @@ async function DBSandBox() {
 
     
     await dbOrder.create(idCakeOrder);
-    await dbOrder.delete(idCakeOrder.getId());
+    // await dbOrder.delete(idCakeOrder.getId());
     // await dbOrder.update(idCakeOrder);
     console.log((await dbOrder.getAll()).length);
     

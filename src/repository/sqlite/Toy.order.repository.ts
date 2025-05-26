@@ -1,44 +1,44 @@
-import { ItemCategory } from "../../model/IItem";
 import { IdentifiableToy } from "../../model/Toy.model";
-import { id, Initializable, IRepository } from "../../repository/IRepository";
-import { connectionManager } from "./connectionManager";
-import logger from "../../util/logger";
+import { id, Initializable, IRepository } from "../IRepository";
 import { DbException, InitializationException, ItemNotFoundException } from "../../util/exceptions/repositoryExceptions";
+import logger from "../../util/logger";
+import { ConnectionManager } from "./ConnectionManager";
+import { ItemCategory } from "../../model/IItem";
 import { PostgreSQLToy, PostgreSQLToyMapper } from "../../mappers/Toy.mapper";
 import { DBMode, MapperFactory } from "../../mappers/Mapper.factory";
 
 const tableName = ItemCategory.TOY;
 const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS ${tableName} (
     id TEXT PRIMARY KEY,
-    "orderId" INTEGER NOT NULL,
+    orderId INTEGER NOT NULL,
     type TEXT NOT NULL,
-    "ageGroup" TEXT NOT NULL,
+    ageGroup TEXT NOT NULL,
     brand TEXT NOT NULL,
     material TEXT NOT NULL,
-    "batteryRequired" BOOLEAN NOT NULL,
+    batteryRequired BOOLEAN NOT NULL,
     educational BOOLEAN NOT NULL
     )`;
 
 const INSERT_TOY = `INSERT INTO ${tableName} (
-    id, "orderId", type, "ageGroup", brand, material, "batteryRequired", educational)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+    id, orderId, type, ageGroup, brand, material, batteryRequired, educational)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
-const SELECT_BY_ID = `SELECT * FROM ${tableName} WHERE id = $1`;
+const SELECT_BY_ID = `SELECT * FROM ${tableName} WHERE id = ?`;
 
 const SELECT_ALL = `SELECT * FROM ${tableName}`;
 
-const DELETE_ID = `DELETE FROM ${tableName} WHERE id = $1`;
+const DELETE_ID = `DELETE FROM ${tableName} WHERE id = ?`;
 
 const UPDATE_ID = `UPDATE ${tableName} SET
-    "orderId" = $1, type = $2, "ageGroup" = $3, brand = $4, material = $5,
-    "batteryRequired" = $6, educational = $7 WHERE id = $8`;
+    orderId = ?, type = ?, ageGroup = ?, brand = ?, material = ?,
+    batteryRequired = ?, educational = ? WHERE id = ?`;
 
 export class ToyRepository implements IRepository<IdentifiableToy>, Initializable {
 
     async init(): Promise<void> {
         try {
-            const conn = await connectionManager.getConnection();
-            await conn.query(CREATE_TABLE);
+            const conn = await ConnectionManager.getConnection();
+            await conn.exec(CREATE_TABLE);
             logger.info("Toy table initialized");
         } catch (error) {
             logger.error("Failed to initialize Toy table", error as Error);
@@ -48,8 +48,8 @@ export class ToyRepository implements IRepository<IdentifiableToy>, Initializabl
 
     async create(item: IdentifiableToy): Promise<id> {
         try {
-            const conn = await connectionManager.getConnection();
-            await conn.query(INSERT_TOY, [
+            const conn = await ConnectionManager.getConnection();
+            await conn.run(INSERT_TOY, [
                 item.getId(),
                 item.getOrderId(),
                 item.getType(),
@@ -68,12 +68,12 @@ export class ToyRepository implements IRepository<IdentifiableToy>, Initializabl
 
     async get(id: id): Promise<IdentifiableToy> {
         try {
-            const conn = await connectionManager.getConnection();
-            const result = await conn.query(SELECT_BY_ID, [id]);
-            if (result.rows.length === 0) {
+            const conn = await ConnectionManager.getConnection();
+            const result = await conn.get<PostgreSQLToy>(SELECT_BY_ID, id);
+            if (!result) {
                 throw new ItemNotFoundException(`Toy of id ${id} not found`);
             }
-            return new PostgreSQLToyMapper().map(result.rows[0]);
+            return new PostgreSQLToyMapper().map(result);
         } catch (error) {
             logger.error("Failed to get toy of id %s %o", id, error as Error);
             throw new DbException("Failed to get toy of id" + id, error as Error);
@@ -82,10 +82,10 @@ export class ToyRepository implements IRepository<IdentifiableToy>, Initializabl
 
     async getAll(): Promise<IdentifiableToy[]> {
         try {
-            const conn = await connectionManager.getConnection();
-            const result = await conn.query<PostgreSQLToy>(SELECT_ALL);
-            const mapper = MapperFactory.create(DBMode.POSTGRESQL, ItemCategory.TOY);
-            return result.rows.map((row: any) => mapper.map(row));
+            const conn = await ConnectionManager.getConnection();
+            const result = await conn.all<PostgreSQLToy[]>(SELECT_ALL);
+            const mapper = MapperFactory.create(DBMode.SQLITE, ItemCategory.TOY);
+            return result.map((toy) => mapper.map(toy));
         } catch (error) {
             logger.error("Failed to get all toys");
             throw new DbException("Failed to get all toys", error as Error);
@@ -94,8 +94,8 @@ export class ToyRepository implements IRepository<IdentifiableToy>, Initializabl
 
     async update(item: IdentifiableToy): Promise<void> {
         try {
-            const conn = await connectionManager.getConnection();
-            await conn.query(UPDATE_ID, [
+            const conn = await ConnectionManager.getConnection();
+            await conn.run(UPDATE_ID, [
                 item.getOrderId(),
                 item.getType(),
                 item.getAgeGroup(),
@@ -113,11 +113,11 @@ export class ToyRepository implements IRepository<IdentifiableToy>, Initializabl
 
     async delete(id: id): Promise<void> {
         try {
-            const conn = await connectionManager.getConnection();
-            await conn.query(DELETE_ID, [id]);
+            const conn = await ConnectionManager.getConnection();
+            await conn.run(DELETE_ID, id);
         } catch (error) {
-            logger.error("Failed to delete book of id %s %o", id, error as Error);
-            throw new DbException("Failed to delete book of id" + id, error as Error);
+            logger.error("Failed to delete toy of id %s %o", id, error as Error);
+            throw new DbException("Failed to delete toy of id" + id, error as Error);
         }
     }
 }
