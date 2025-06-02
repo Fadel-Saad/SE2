@@ -1,0 +1,229 @@
+openapi: 3.0.0
+info:
+  title: Analytics Service API
+  version: 1.0.0
+  description: API for retrieving order and revenue analytics. It provides business intelligence for stakeholders and management. These analytics endpoints will help them understand sales performance, customer behavior, and product popularity.
+servers:
+  - url: https://api.analytics-service.com/v1 
+tags:
+  - name: analytics
+    description: Provides analytical info of several metrics
+paths:
+  /analytics/orders/count:
+    get:
+      tags:
+        - analytics
+      summary: Get total number of orders
+      responses:
+        '200':
+          description: Created orders in total
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalCountResponse'
+              example:
+                totalOrders: 1500
+        '403':
+          description: Forbidden user not authorized
+        '500':
+          description: Internal server error
+
+  /analytics/orders/count/{type}:
+    get:
+      tags:
+        - analytics
+      summary: Get number of orders per item type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Orders count grouped by item type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CountByItemType'
+              example:
+                itemType: "cake"
+                orderCount: 540
+                
+        '400':
+          description: Invalid Item supplied
+        '403':
+          description: Forbidden user not authorized
+        '404':
+          description: Item not found
+        '500':
+          description: Internal server error
+
+  /analytics/orders/revenue:
+    get:
+      tags:
+        - analytics
+      summary: Get total revenue from all orders
+      responses:
+        '200':
+          description: Total revenue amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotalRevenueResponse'
+              example:
+                totalRevenue: 75000
+        '403':
+          description: Forbidden user not authorized
+        '500':
+          description: Internal server error
+
+  /analytics/orders/revenue/{type}:
+    get:
+      tags:
+        - analytics
+      summary: Get revenue for a specific item type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Revenue of specific item type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RevenueByItemType'
+              example:
+                itemType: "book"
+                totalRevenue: 10000
+                
+        '400':
+          description: Invalid Item supplied
+        '403':
+          description: Forbidden user not authorized
+        '404':
+          description: Item not found
+        '500':
+          description: Internal server error
+
+  /analytics/orders/revenue/average-value:
+    get:
+      tags:
+        - analytics
+      summary: Get average order value
+      responses:
+        '200':
+          description: Average value of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AverageOrderValueResponse'
+              example:
+                averageOrderValue: 50.75
+        '403':
+          description: Forbidden user not authorized
+        '500':
+          description: Internal server error
+
+  /analytics/orders/top-selling:
+    get:
+      tags:
+        - analytics
+      summary: Get top selling items by quantity sold
+      responses:
+        '200':
+          description: Top selling items in each type with quantities and revenue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopSellingOrder'
+              example:
+                - item: { id: 453324, type: "cake" }
+                  totalQuantity: 1200
+                  totalRevenue: 36000.00
+                - item: { id: 234577, type: "book" }
+                  totalQuantity: 700
+                  totalRevenue: 7000.00
+                - item: { id: 552190, type: "toy" }
+                  totalQuantity: 900
+                  totalRevenue: 13500.00
+        '403':
+          description: Forbidden user not authorized
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    TotalCountResponse:
+      type: object
+      properties:
+        totalOrders:
+          type: integer
+          description: Total number of orders
+
+    CountByItemType:
+      type: object
+      properties:
+        itemType:
+          type: string
+          description: Type/category of the item
+        orderCount:
+          type: integer
+          description: Number of orders for this item type
+
+    TotalRevenueResponse:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+          format: double
+          description: Total revenue from all orders
+
+    RevenueByItemType:
+      type: object
+      properties:
+        itemType:
+          type: string
+          description: Type/category of the item
+        totalRevenue:
+          type: number
+          format: double
+          description: Total revenue for this item type
+
+    AverageOrderValueResponse:
+      type: object
+      properties:
+        averageOrderValue:
+          type: number
+          format: double
+          description: Average value of orders
+
+    TopSellingOrder:
+      type: object
+      properties:
+        item:
+          type: object
+          description: Best selling Order in each type
+          properties:
+            id:
+              type: number
+              example: 453324
+            type:
+              type: string
+              example: "cake"
+        totalQuantity:
+          type: integer
+          description: Total quantity sold
+        totalRevenue:
+          type: number
+          format: double
+          description: Total revenue generated
