@@ -9,7 +9,7 @@ tags:
   - name: analytics
     description: Provides analytical info of several metrics
 paths:
-  /analytics/orders/total:
+  /analytics/orders/count:
     get:
       tags:
         - analytics
@@ -20,7 +20,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TotalOrdersResponse'
+                $ref: '#/components/schemas/TotalCountResponse'
               example:
                 totalOrders: 1500
         '403':
@@ -28,11 +28,17 @@ paths:
         '500':
           description: Internal server error
 
-  /analytics/orders/by-item-type:
+  /analytics/orders/count/{type}:
     get:
       tags:
         - analytics
       summary: Get number of orders per item type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Orders count grouped by item type
@@ -41,14 +47,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/OrdersByItemTypeItem'
+                  $ref: '#/components/schemas/CountByItemType'
               example:
-                - itemType: "cake"
-                  orderCount: 540
-                - itemType: "book"
-                  orderCount: 300
-                - itemType: "toy"
-                  orderCount: 474
+                itemType: "cake"
+                orderCount: 540
+                
         '400':
           description: Invalid Item supplied
         '403':
@@ -58,7 +61,7 @@ paths:
         '500':
           description: Internal server error
 
-  /analytics/revenue/total:
+  /analytics/orders/revenue:
     get:
       tags:
         - analytics
@@ -77,27 +80,30 @@ paths:
         '500':
           description: Internal server error
 
-  /analytics/revenue/by-item-type:
+  /analytics/orders/revenue/{type}:
     get:
       tags:
         - analytics
-      summary: Get revenue breakdown by item type
+      summary: Get revenue for a specific item type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Revenue grouped by item type
+          description: Revenue of specific item type
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RevenueByItemTypeItem'
+                  $ref: '#/components/schemas/RevenueByItemType'
               example:
-                - itemType: "cake"
-                  totalRevenue: 35000
-                - itemType: "book"
-                  totalRevenue: 10000
-                - itemType: "toy"
-                  totalRevenue: 30000
+                itemType: "book"
+                totalRevenue: 10000
+                
         '400':
           description: Invalid Item supplied
         '403':
@@ -107,7 +113,7 @@ paths:
         '500':
           description: Internal server error
 
-  /analytics/orders/average-value:
+  /analytics/orders/revenue/average-value:
     get:
       tags:
         - analytics
@@ -126,7 +132,7 @@ paths:
         '500':
           description: Internal server error
 
-  /analytics/items/top-selling:
+  /analytics/orders/top-selling:
     get:
       tags:
         - analytics
@@ -139,7 +145,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TopSellingItem'
+                  $ref: '#/components/schemas/TopSellingOrder'
               example:
                 - item: { id: 453324, type: "cake" }
                   totalQuantity: 1200
@@ -157,14 +163,14 @@ paths:
 
 components:
   schemas:
-    TotalOrdersResponse:
+    TotalCountResponse:
       type: object
       properties:
         totalOrders:
           type: integer
           description: Total number of orders
 
-    OrdersByItemTypeItem:
+    CountByItemType:
       type: object
       properties:
         itemType:
@@ -182,7 +188,7 @@ components:
           format: double
           description: Total revenue from all orders
 
-    RevenueByItemTypeItem:
+    RevenueByItemType:
       type: object
       properties:
         itemType:
@@ -201,12 +207,12 @@ components:
           format: double
           description: Average value of orders
 
-    TopSellingItem:
+    TopSellingOrder:
       type: object
       properties:
         item:
           type: object
-          description: Best selling item in each type
+          description: Best selling Order in each type
           properties:
             id:
               type: number
