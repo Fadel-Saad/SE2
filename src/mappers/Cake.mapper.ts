@@ -44,7 +44,7 @@ export class CSVCakeMapper implements IMapper<string[], Cake> {
     
 }
 
-export interface SQLiteCake {
+export interface DBCake {
     id: string;
     type: string;
     flavor: string;
@@ -62,9 +62,9 @@ export interface SQLiteCake {
     packagingType: string;
 }
 
-export class SQLiteCakeMapper implements IMapper<SQLiteCake, IdentifiableCake> {
+export class PostgreSQLCakeMapper implements IMapper<DBCake, IdentifiableCake> {
         
-    map(data: SQLiteCake): IdentifiableCake {
+    map(data: DBCake): IdentifiableCake {
         return IdentifiableCakeBuilder.newBuilder()
                     .setCake(CakeBuilder.newBuilder()
                         .setType(data.type)
@@ -86,7 +86,52 @@ export class SQLiteCakeMapper implements IMapper<SQLiteCake, IdentifiableCake> {
                     .build();
     }
 
-    reverseMap(data: IdentifiableCake): SQLiteCake {
+    reverseMap(data: IdentifiableCake): DBCake {
+        return {
+            id: data.getId(),
+            type: data.getType(),
+            flavor: data.getFlavor(),
+            filling: data.getFilling(),
+            size: data.getSize(),
+            layers: data.getLayers(),
+            frostingType: data.getFrostingType(),
+            frostingFlavor: data.getFrostingFlavor(),
+            decorationType: data.getDecorationType(),
+            decorationColor: data.getDecorationColor(),
+            customMessage: data.getCustomMessage(),
+            shape: data.getShape(),
+            allergies: data.getAllergies(),
+            specialIngredients: data.getSpecialIngredients(),
+            packagingType: data.getPackagingType()
+        }
+    }
+}
+
+export class SQLiteCakeMapper implements IMapper<DBCake, IdentifiableCake> {
+        
+    map(data: DBCake): IdentifiableCake {
+        return IdentifiableCakeBuilder.newBuilder()
+                    .setCake(CakeBuilder.newBuilder()
+                        .setType(data.type)
+                        .setFlavor(data.flavor)
+                        .setFilling(data.filling)
+                        .setSize(data.size)
+                        .setLayers(data.layers)
+                        .setFrostingType(data.frostingType)
+                        .setFrostingFlavor(data.frostingFlavor)
+                        .setDecorationType(data.decorationType)
+                        .setDecorationColor(data.decorationColor)
+                        .setCustomMessage(data.customMessage)
+                        .setShape(data.shape)
+                        .setAllergies(data.allergies)
+                        .setSpecialIngredients(data.specialIngredients)
+                        .setPackagingType(data.packagingType)
+                        .build())
+                    .setId(data.id)
+                    .build();
+    }
+
+    reverseMap(data: IdentifiableCake): DBCake {
         return {
             id: data.getId(),
             type: data.getType(),

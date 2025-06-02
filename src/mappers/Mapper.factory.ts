@@ -1,9 +1,9 @@
 import { IIdentifiableItem, IItem, ItemCategory } from "../model/IItem";
 import { IMapper } from "./IMapper";
 import { IIdentifiableOrderItem, IOrder } from "../model/IOrder";
-import { CSVCakeMapper, SQLiteCake, SQLiteCakeMapper } from "./Cake.mapper";
-import { PostgreSQLBook, PostgreSQLBookMapper } from "./Book.mapper";
-import { PostgreSQLToy, PostgreSQLToyMapper } from "./Toy.mapper";
+import { CSVCakeMapper, DBCake, PostgreSQLCakeMapper, SQLiteCakeMapper } from "./Cake.mapper";
+import { DBBook, PostgreSQLBookMapper, SQLiteBookMapper } from "./Book.mapper";
+import { DBToy, PostgreSQLToyMapper, SQLiteToyMapper } from "./Toy.mapper";
 import { CSVOrderMapper } from "./Order.mapper";
 
 export enum DBMode {
@@ -22,7 +22,7 @@ export class MapperFactory {
             case DBMode.POSTGRESQL:
                 switch (category) {
                     case ItemCategory.CAKE:
-                        mapper = new SQLiteCakeMapper();
+                        mapper = new PostgreSQLCakeMapper();
                         break;
                     case ItemCategory.BOOK:
                         mapper = new PostgreSQLBookMapper();
@@ -41,10 +41,10 @@ export class MapperFactory {
                         mapper = new SQLiteCakeMapper();
                         break;
                     case ItemCategory.BOOK:
-                        mapper = new PostgreSQLBookMapper();
+                        mapper = new SQLiteBookMapper();
                         break;
                     case ItemCategory.TOY:
-                        mapper = new PostgreSQLToyMapper();
+                        mapper = new SQLiteToyMapper();
                         break;
                     default:
                         throw new Error("Unsupported category");

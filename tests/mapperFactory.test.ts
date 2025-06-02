@@ -1,16 +1,16 @@
 import { MapperFactory } from "../src/mappers/Mapper.factory";
 import { DBMode } from "../src/mappers/Mapper.factory";
 import { ItemCategory } from "../src/model/IItem";
-import { SQLiteCakeMapper } from "../src/mappers/Cake.mapper";
-import { PostgreSQLBookMapper } from "../src/mappers/Book.mapper";
-import { PostgreSQLToyMapper } from "../src/mappers/Toy.mapper";
+import { PostgreSQLCakeMapper, SQLiteCakeMapper } from "../src/mappers/Cake.mapper";
+import { PostgreSQLBookMapper, SQLiteBookMapper } from "../src/mappers/Book.mapper";
+import { PostgreSQLToyMapper, SQLiteToyMapper } from "../src/mappers/Toy.mapper";
 import { CSVOrderMapper } from "../src/mappers/Order.mapper";
 
 describe("MapperFactory.create", () => {
     
-    it("returns SQLiteCakeMapper for DBMode.POSTGRESQL and ItemCategory.CAKE", () => {
+    it("returns PostgreSQLCakeMapper for DBMode.POSTGRESQL and ItemCategory.CAKE", () => {
         const mapper = MapperFactory.create(DBMode.POSTGRESQL, ItemCategory.CAKE);
-        expect(mapper).toBeInstanceOf(SQLiteCakeMapper);
+        expect(mapper).toBeInstanceOf(PostgreSQLCakeMapper);
     });
 
     it("returns PostgreSQLBookMapper for DBMode.POSTGRESQL and ItemCategory.BOOK", () => {
@@ -28,14 +28,14 @@ describe("MapperFactory.create", () => {
         expect(mapper).toBeInstanceOf(SQLiteCakeMapper);
     });
 
-    it("returns PostgreSQLBookMapper for DBMode.SQLITE and ItemCategory.BOOK", () => {
+    it("returns SQLiteBookMapper for DBMode.SQLITE and ItemCategory.BOOK", () => {
         const mapper = MapperFactory.create(DBMode.SQLITE, ItemCategory.BOOK);
-        expect(mapper).toBeInstanceOf(PostgreSQLBookMapper);
+        expect(mapper).toBeInstanceOf(SQLiteBookMapper);
     });
 
-    it("returns PostgreSQLToyMapper for DBMode.SQLITE and ItemCategory.TOY", () => {
+    it("returns SQLiteToyMapper for DBMode.SQLITE and ItemCategory.TOY", () => {
         const mapper = MapperFactory.create(DBMode.SQLITE, ItemCategory.TOY);
-        expect(mapper).toBeInstanceOf(PostgreSQLToyMapper);
+        expect(mapper).toBeInstanceOf(SQLiteToyMapper);
     });
 
     it("returns CSVOrderMapper for DBMode.FILE and ItemCategory.CAKE", () => {
