@@ -5,6 +5,7 @@ import logger from "../../util/logger";
 import { ConnectionManager } from "./ConnectionManager";
 import { ItemCategory } from "../../model/IItem";
 import { SQLiteCake, SQLiteCakeMapper } from "../../mappers/Cake.mapper";
+import { DBMode, MapperFactory } from "../../mappers/Mapper.factory";
 
 const tableName = ItemCategory.CAKE;
 const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -98,7 +99,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
         try {
             const conn = await ConnectionManager.getConnection();
             const result = await conn.all<SQLiteCake[]>(SELECT_ALL);
-            const mapper = new SQLiteCakeMapper();
+            const mapper = MapperFactory.create(DBMode.SQLITE, ItemCategory.CAKE);
             return result.map((cake) => mapper.map(cake));
         } catch (error) {
             logger.error("Failed to get all cakes");

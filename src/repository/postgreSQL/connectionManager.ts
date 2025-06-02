@@ -4,12 +4,12 @@ import { DatabaseConnectionException } from "../../util/exceptions/DatabaseConne
 import config from "../../config";
 
 
-export class postgreConnectionManager {
+export class connectionManager {
     private static db: Pool | null = null;
 
     private constructor() {}
 
-    public static async getPostgreConnection(): Promise<Pool> {
+    public static async getConnection(): Promise<Pool> {
         if (this.db === null) {
             try {
                     this.db = new Pool({
@@ -28,7 +28,7 @@ export class postgreConnectionManager {
         return this.db;
     }
 
-    public static async closePostgreConnection(): Promise<void> {
+    public static async closeConnection(): Promise<void> {
         if (this.db) {
             await this.db.end();
             this.db = null;

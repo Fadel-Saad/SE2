@@ -6,7 +6,7 @@ import { CakeBuilder, IdentifiableCakeBuilder } from '../src/model/builders/cake
 import { OrderBuilder, IdentifiableOrderItemBuilder } from '../src/model/builders/order.builder';
 import { BookBuilder, IdentifiableBookBuilder } from '../src/model/builders/book.builder';
 import { IdentifiableToyBuilder, ToyBuilder } from '../src/model/builders/toy.builder';
-import { postgreConnectionManager } from '../src/repository/postgreSQL/postgreConnectionManager';
+import { connectionManager } from '../src/repository/postgreSQL/connectionManager';
 
 describe('Cake Order Repository CRUD operations', () => {
     let dbOrder: OrderRepository;
@@ -167,7 +167,7 @@ describe("Toy order repository CRUD operations", () => {
         };
 
         // Close the database connection
-        await postgreConnectionManager.closePostgreConnection();
+        await connectionManager.closeConnection();
     });
 
     it('should create a toy order', async () => {

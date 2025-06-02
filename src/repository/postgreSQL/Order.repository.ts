@@ -1,7 +1,7 @@
 import { IIdentifiableItem } from "../../model/IItem";
 import { IIdentifiableOrderItem } from "../../model/IOrder";
 import { IRepository, Initializable, id } from "../IRepository";
-import { postgreConnectionManager } from "./postgreConnectionManager";
+import { connectionManager } from "./connectionManager";
 import logger from "../../util/logger";
 import { DbException, InitializationException } from "../../util/exceptions/repositoryExceptions";
 import { SQLiteOrder, SQLiteOrderMapper } from "../../mappers/Order.mapper";
@@ -30,7 +30,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
 
     async init() {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             await conn.query(CREATE_TABLE);
             await this.itemRepository.init();
             logger.info("Order table initialized");
@@ -43,7 +43,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
     async create(order: IIdentifiableOrderItem): Promise<id> {
         let conn;
         try {
-            conn = await postgreConnectionManager.getPostgreConnection();
+            conn = await connectionManager.getConnection();
             conn.query("BEGIN TRANSACTION");
             const item_id = await this.itemRepository.create(order.getItem());
             conn.query(INSERT_ORDER, [order.getId(),
@@ -62,7 +62,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
 
     async get(id: id): Promise<IIdentifiableOrderItem> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             const result = await conn.query<SQLiteOrder>(SELECT_BY_ID, [id]);
             if (result.rows.length === 0) {
                 logger.error("Order of id %s not found", id);
@@ -78,7 +78,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
 
     async getAll(): Promise<IIdentifiableOrderItem[]> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             const items = await this.itemRepository.getAll();
             if (items.length === 0) {
                 return [];
@@ -105,7 +105,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
     async update(order: IIdentifiableOrderItem): Promise<void> {
         let conn;
         try {
-            conn = await postgreConnectionManager.getPostgreConnection();
+            conn = await connectionManager.getConnection();
             conn.query("BEGIN TRANSACTION");
             await this.itemRepository.update(order.getItem());
             await conn.query(UPDATE_ID, [
@@ -125,7 +125,7 @@ export class OrderRepository implements IRepository<IIdentifiableOrderItem>, Ini
     async delete(id: id): Promise<void> {
         let conn;
         try {
-            conn = await postgreConnectionManager.getPostgreConnection();
+            conn = await connectionManager.getConnection();
             conn.query("BEGIN TRANSACTION");
             await this.itemRepository.delete((await this.get(id)).getItem().getId());
             await conn.query(DELETE_ID, [id]);

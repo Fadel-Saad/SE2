@@ -2,9 +2,10 @@ import logger from "../../util/logger";
 import { IdentifiableCake } from "../../model/Cake.model";
 import { ItemCategory } from "../../model/IItem";
 import { id, Initializable, IRepository } from "../../repository/IRepository";
-import { postgreConnectionManager } from "./postgreConnectionManager";
+import { connectionManager } from "./connectionManager";
 import { DbException, InitializationException, ItemNotFoundException } from "../../util/exceptions/repositoryExceptions";
 import { SQLiteCake, SQLiteCakeMapper } from "../../mappers/Cake.mapper";
+import { DBMode, MapperFactory } from "../../mappers/Mapper.factory";
 
 const tableName = ItemCategory.CAKE;
 const CREATE_TABLE = `CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -46,7 +47,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async init(): Promise<void> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             await conn.query(CREATE_TABLE);
             logger.info("Cake table initialized");
         } catch (error) {
@@ -57,7 +58,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async create(item: IdentifiableCake): Promise<id> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             await conn.query(INSERT_CAKE, [
                 item.getId(),
                 item.getType(),
@@ -83,7 +84,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async get(id: id): Promise<IdentifiableCake> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             const result = await conn.query(SELECT_BY_ID, [id]);
             if (result.rows.length === 0) {
                 throw new ItemNotFoundException(`Cake of id ${id} not found`);
@@ -97,9 +98,9 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async getAll(): Promise<IdentifiableCake[]> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             const result = await conn.query<SQLiteCake>(SELECT_ALL);
-            const mapper = new SQLiteCakeMapper();
+            const mapper = MapperFactory.create(DBMode.POSTGRESQL, ItemCategory.CAKE);
             return result.rows.map((cake) => mapper.map(cake));
         } catch (error) {
             logger.error("Failed to get all cakes");
@@ -109,7 +110,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async update(item: IdentifiableCake): Promise<void> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             await conn.query(UPDATE_ID, [
                 item.getType(),
                 item.getFlavor(),
@@ -135,7 +136,7 @@ export class CakeRepository implements IRepository<IdentifiableCake>, Initializa
 
     async delete(id: id): Promise<void> {
         try {
-            const conn = await postgreConnectionManager.getPostgreConnection();
+            const conn = await connectionManager.getConnection();
             await conn.query(DELETE_ID, [id]);
         } catch (error) {
             logger.error("Failed to delete cake of id %s %o", id, error as Error);

@@ -31,7 +31,7 @@ export class XMLToyMapper implements IMapper<{} | [], Toy> {
     }
 }
 
-export interface PostgreSQLToy {
+export interface DBToy {
     id: string;
     orderId: number;
     type: string;
@@ -42,9 +42,9 @@ export interface PostgreSQLToy {
     educational: boolean;
 }
 
-export class PostgreSQLToyMapper implements IMapper<PostgreSQLToy, IdentifiableToy> {
+export class PostgreSQLToyMapper implements IMapper<DBToy, IdentifiableToy> {
 
-    map(data: PostgreSQLToy): IdentifiableToy {
+    map(data: DBToy): IdentifiableToy {
         return IdentifiableToyBuilder.newBuilder()
                     .setToy(ToyBuilder.newBuilder()
                         .setOrderId(data.orderId)
@@ -59,7 +59,39 @@ export class PostgreSQLToyMapper implements IMapper<PostgreSQLToy, IdentifiableT
                     .build();
     }
     
-    reverseMap(data: IdentifiableToy): PostgreSQLToy {
+    reverseMap(data: IdentifiableToy): DBToy {
+        return {
+            id: data.getId(),
+            orderId: data.getOrderId(),
+            type: data.getType(),
+            ageGroup: data.getAgeGroup(),
+            brand: data.getBrand(),
+            material: data.getMaterial(),
+            batteryRequired: data.getBatteryRequired(),
+            educational: data.getEducational()
+        }
+    }
+
+}
+
+export class SQLiteToyMapper implements IMapper<DBToy, IdentifiableToy> {
+
+    map(data: DBToy): IdentifiableToy {
+        return IdentifiableToyBuilder.newBuilder()
+                    .setToy(ToyBuilder.newBuilder()
+                        .setOrderId(data.orderId)
+                        .setType(data.type)
+                        .setAgeGroup(data.ageGroup)
+                        .setBrand(data.brand)
+                        .setMaterial(data.material)
+                        .setBatteryRequired(data.batteryRequired)
+                        .setEducational(data.educational)
+                        .build())
+                    .setId(data.id)
+                    .build();
+    }
+    
+    reverseMap(data: IdentifiableToy): DBToy {
         return {
             id: data.getId(),
             orderId: data.getOrderId(),

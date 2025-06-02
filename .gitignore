@@ -3,5 +3,6 @@ build/
 logs/
 .vscode/
 coverage/
+/src/data/
 .DS_Store
 .env
