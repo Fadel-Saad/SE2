@@ -1,37 +1,47 @@
+import config from "./config";
+import express, { NextFunction, Request, Response } from "express";
 import logger from "./util/logger";
-import { CakeBuilder, IdentifiableCakeBuilder } from "./model/builders/cake.builder";
-import { IdentifiableOrderItemBuilder, OrderBuilder } from "./model/builders/order.builder";
-import { OrderRepository } from "./repository/postgreSQL/Order.repository";
-import { ToyRepository } from "./repository/postgreSQL/Toy.order.repository";
-import { DBMode, RepositoryFactory } from "./repository/Repository.factory";
-import { ItemCategory } from "./model/IItem";
+import helmet from "helmet";
+import bodyParser from "body-parser"
+import cors from "cors";
+import requestLogger from "./middleware/requestLogger";
+import routes from "./routes";
+import { ApiException } from "./util/exceptions/ApiException";
 
+const app = express();
 
-async function DBSandBox() {
+// config helmet
+app.use(helmet());
 
-    const dbOrder = await RepositoryFactory.create(DBMode.POSTGRESQL, ItemCategory.CAKE);
+// config body parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
 
-    // create identifiable cake
-    const cake = CakeBuilder.newBuilder().setType("cake")
-    .setFlavor("chocolate").setFilling("cream")
-    .setSize(10).setLayers(2).setFrostingType("buttercream")
-    .setFrostingFlavor("vanilla").setDecorationType("sprinkles")
-    .setDecorationColor("red").setCustomMessage("happy birthday")
-    .setShape("round").setAllergies("nuts")
-    .setSpecialIngredients("none").setPackagingType("box").build();
+// config cors
+app.use(cors());
 
-    const idCake = IdentifiableCakeBuilder.newBuilder().setCake(cake).setId(Math.random().toString(36).substring(2, 15)).build();
+// add middlewares
+app.use(requestLogger)
 
-    // create identifiable order
-    const cakeOrder = OrderBuilder.newBuilder().setPrice(100).setItem(cake).setQuantity(1).setId(Math.random().toString(36).substring(2, 15)).build();
-    const idCakeOrder = IdentifiableOrderItemBuilder.newBuilder().setItem(idCake).setOrder(cakeOrder).build();
+// config routes
+app.use("/", routes);
 
-    
-    await dbOrder.create(idCakeOrder);
-    // await dbOrder.delete(idCakeOrder.getId());
-    // await dbOrder.update(idCakeOrder);
-    console.log((await dbOrder.getAll()).length);
-    
-}
+// config 404 handler
+app.use((req, res) => {
+    res.status(404).json({error: "Not Found"});
+});
 
-DBSandBox().catch((error) => logger.error("Error in DB sandbox: %o", error as Error));
+// config error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof ApiException) {
+        logger.error("API Exception of status %d: %s", err.status, err.message);
+        res.status(err.status).json({error: err.message});
+    } else {
+        logger.error("Unhandled Error: %s", err.message);
+        res.status(500).json({ error: "Internal Server Error "});
+    }
+})
+
+app.listen(Number(config.port), config.host, () => {
+    logger.info("Server is running on http://%s:%d", config.host, config.port);
+});

@@ -1,6 +1,6 @@
 import { ItemCategory } from "../model/IItem";
 import { Initializable, IRepository } from "./IRepository";
-import { IOrder } from "../model/IOrder";
+import { IIdentifiableOrderItem, IOrder } from "../model/IOrder";
 import { OrderRepository as pgOrderRepository } from "./postgreSQL/Order.repository";
 import { CakeRepository as pgCakeRepository } from "./postgreSQL/Cake.order.repository";
 import { BookRepository as pgBookRepository} from "./postgreSQL/Book.order.repository";
@@ -10,7 +10,6 @@ import { CakeRepository } from "./sqlite/Cake.order.repository";
 import { BookRepository } from "./sqlite/Book.order.repository"
 import { ToyRepository } from "./sqlite/Toy.order.repository"
 import { CakeOrderRepository } from "./file/Cake.order.repository";
-import config from "../config";
 
 
 export enum DBMode {
@@ -21,9 +20,9 @@ export enum DBMode {
 
 export class RepositoryFactory {
 
-    public static async create(mode: DBMode, category: ItemCategory): Promise <IRepository<IOrder>> {
+    public static async create(mode: DBMode, category: ItemCategory): Promise <IRepository<IIdentifiableOrderItem>> {
 
-        let repository: IRepository<IOrder> & Initializable;
+        let repository: IRepository<IIdentifiableOrderItem> & Initializable;
         switch (mode) {
             case DBMode.POSTGRESQL:
                 switch (category) {
@@ -66,13 +65,7 @@ export class RepositoryFactory {
                 return repository;
 
             case DBMode.FILE:
-                switch (category) {
-                    case ItemCategory.CAKE:
-                        return new CakeOrderRepository(config.storagePath.csv.cake);
-                    default:
-                        throw new Error("Unsupported category");
-                }
-
+                throw new Error("File mode is deprecated");
             default:
                 throw new Error("Unsupported DB mode");
         }
